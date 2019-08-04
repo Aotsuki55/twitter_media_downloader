@@ -73,7 +73,7 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 					new_max_id_str = tweets[data].id_str;
 				}
 			}
-			if(flag || max_id_str==new_max_id_str||tweets.length==0){
+			if(flag || max_id_str==new_max_id_str||tweets.length==0||tweets.length==1){
 				if(new_since_id_str!=""){
 					connection.query(
 						'update updateId set ?',
@@ -94,6 +94,8 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 						}
 					);
 				}
+				global.endFlag = 1;
+				resolved();
 			}
 			else{
 				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, new_max_id_str, new_since_id, new_since_id_str, new_Date);
