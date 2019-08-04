@@ -1,0 +1,15 @@
+{
+  "name": "twitter_dev",
+  "version": "0.0.1",
+  "main": "/twitter/streaming/app.js",
+  "author": "aotsuki",
+  "devDependencies": {
+    "mysql": "^2.12.0",
+    "nconf": "^0.8.4",
+    "twitter": "^1.6.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.5",
+    "request": "^2.88.0"
+  }
+}
