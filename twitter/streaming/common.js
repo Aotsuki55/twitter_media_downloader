@@ -16,26 +16,38 @@ exports.getTweet = function(twitter, connection, driver, db) {
 exports.getTweet2 = function(twitter, connection, driver, db) {
 	return new Promise(function(resolved, rejected){
 		let since_id_str = "";
+		let max_id_str = "";
+		let id = 0;
 		connection.query(
-			'SELECT * FROM `updateId`',
+			'SELECT max(id) FROM `updateId`',
 			function (error, results, fields) {
 				if(error) console.log(error);
-				else since_id_str=results[0].newestId_str;
-				if(since_id_str!=""){
-					var x=since_id_str.length-1;
-					since_id_str[x]--;
-					for(;x>=0;x--){
-						if(since_id_str[x]!=('0'-1)) break;
-						since_id_str[x] = '9';
+				else id = results[0];
+				connection.query(
+					'SELECT * FROM `updateId` where `id` = ' + id,
+					function (error, results, fields) {
+						if(error) console.log(error);
+						else{
+							if(results[0].newestId_str!=null)since_id_str=results[0].newestId_str;
+							if(results[0].oldestId_str!=null)max_id_str=results[0].oldestId_str;
+						}
+						if(since_id_str!=""){
+							var x=since_id_str.length-1;
+							since_id_str[x]--;
+							for(;x>=0;x--){
+								if(since_id_str[x]!=('0'-1)) break;
+								since_id_str[x] = '9';
+							}
+						}
+						getTimeline(resolved, rejected, twitter, connection, since_id_str, max_id_str, id);
 					}
-				}
-				getTimeline(resolved, rejected, twitter, connection, since_id_str);
+				);
 			}
 		);
 	})
 }
 
-function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_id_str = "", new_since_id = null, new_since_id_str = "", new_Date = null){
+function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_id_str, id, new_since_id = null, new_since_id_str = "", new_Date = null){
 	console.log("max_id_str: " + max_id_str);
 	var databaseClientModule = require('./mysql.js');
 	let new_max_id_str = "";
@@ -98,7 +110,7 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 				resolved();
 			}
 			else{
-				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, new_max_id_str, new_since_id, new_since_id_str, new_Date);
+				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, new_max_id_str, id, new_since_id, new_since_id_str, new_Date);
 			}
 		}
 	});
