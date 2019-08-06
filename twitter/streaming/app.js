@@ -25,10 +25,6 @@ nconf.load(function (err, conf) {
 			var downloadModule = require('./download.js');
 			console.log("Start downloadMedia.");
 			downloadModule.downloadMedia(connection);
-			Promise.delay(1000).then(function() {
-				console.log("Start downloadMedia.");
-				downloadModule.downloadMedia(connection);
-			});
 		});
 	});
 });
