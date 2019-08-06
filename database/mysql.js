@@ -54,7 +54,7 @@ exports.createTweetTable = function(connection, nconf) {
 			 	+ 'is_retweeted boolean, '
 			 	+ 'is_favorited boolean, '
 			 	+ 'is_sensitive boolean, '
-				+ 'lang varchar(10), '
+				+ 'lang varchar(10) '
 			 	+ ') default charset=utf8mb4;';
 	connection.query(sql, function (error, results, fields) {
 		if(error) {
@@ -117,13 +117,15 @@ exports.createMediaTable = function(connection, nconf) {
 
 exports.createUpdateIdTable = function(connection, nconf) {
 	var sql = 'CREATE TABLE `updateId` ('
-		+ '`oldestId` bigint(20) DEFAULT NULL,'
-		+ '`oldestId_str` varchar(30) DEFAULT NULL,'
-		+ '`newestId` bigint(20) DEFAULT NULL,'
-		+ '`newestId_str` varchar(30) DEFAULT NULL,'
-		+ '`oldestDate` datetime DEFAULT NULL,'
-		+ '`newestDate` datetime DEFAULT NULL,'
-		+ '`updated_at` datetime DEFAULT NULL'
+		+ '`id` int auto_increment,'
+		+ '`max_id` bigint(20) DEFAULT NULL,'
+		+ '`max_id_str` varchar(30) DEFAULT NULL,'
+		+ '`since_id` bigint(20) DEFAULT NULL,'
+		+ '`since_id_str` varchar(30) DEFAULT NULL,'
+		+ '`max_date` datetime DEFAULT NULL,'
+		+ '`since_date` datetime DEFAULT NULL,'
+		+ '`updated_at` datetime DEFAULT NULL,'
+		+ 'primary key(id)'
 		+ ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
 	connection.query(sql, function (error, results, fields) {
 		if(error) {

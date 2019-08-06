@@ -23,16 +23,16 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 			'SELECT max(id) FROM `updateId`',
 			function (error, results, fields) {
 				if(error) console.log(error);
-				else id = results[0];
+				else id = results[0]['max(id)'];
 				connection.query(
 					'SELECT * FROM `updateId` where `id` = ' + id,
 					function (error, results, fields) {
 						if(error) console.log(error);
 						else{
-							if(results[0].newestId_str!=null)since_id_str=results[0].newestId_str;
-							if(results[0].oldestId_str!=null)max_id_str=results[0].oldestId_str;
+							if(results[0].since_id_str!=null)since_id_str=results[0].since_id_str;
+							if(results[0].max_id_str!=null)max_id_str=results[0].max_id_str;
 						}
-						origin_since_id_st = since_id_st;
+						origin_since_id_str = since_id_str;
 						if(since_id_str!=""){
 							var x=since_id_str.length-1;
 							since_id_str[x]--;
@@ -41,7 +41,7 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 								since_id_str[x] = '9';
 							}
 						}
-						getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_st, max_id_str, id);
+						getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_str, max_id_str, id);
 					}
 				);
 			}
@@ -49,7 +49,7 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 	})
 }
 
-function getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_st, max_id_str, id, new_since_id = null, new_since_id_str = "", new_Date = null){
+function getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_str, max_id_str, id, new_since_id = null, new_since_id_str = "", new_Date = null){
 	console.log("max_id_str: " + max_id_str);
 	var databaseClientModule = require('./mysql.js');
 	let new_max_id_str = "";
@@ -65,8 +65,8 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 					connection.query(
 						'insert into updateId set ?',
 						{
-							newestId_str: origin_since_id_st,
-							oldestId_str: max_id_str,
+							since_id_str: origin_since_id_str,
+							max_id_str: max_id_str,
 							updated_at: new_Date
 						},
 						function(error,results,fields) {
@@ -77,9 +77,9 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 								connection.query(
 									'update updateId set ? where `id`=0',
 									{
-										newestId: new_since_id,
-										newestId_str: new_since_id_str,
-										newestDate: new_Date,
+										since_id: new_since_id,
+										since_id_str: new_since_id_str,
+										since_date: new_Date,
 										updated_at: new_Date
 									},
 									function(error,results,fields) {
@@ -104,8 +104,8 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 				connection.query(
 					'update updateId set ? where `id`='+id,
 					{
-						newestId_str: origin_since_id_st,
-						oldestId_str: max_id_str,
+						since_id_str: origin_since_id_str,
+						max_id_str: max_id_str,
 						updated_at: new_Date
 					},
 					function(error,results,fields) {
@@ -123,7 +123,7 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 		else{
 			var flag = false;
 			for(data in tweets) {
-				if(!judgeString(origin_since_id_st,tweets[data].id_str)){
+				if(!judgeString(origin_since_id_str,tweets[data].id_str)){
 					console.log("end: "+tweets[data].id_str);
 					flag = true;
 					break;
@@ -152,9 +152,9 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 						connection.query(
 							'update updateId set ? where `id`='+id,
 							{
-								newestId: new_since_id,
-								newestId_str: new_since_id_str,
-								newestDate: new_Date,
+								since_id: new_since_id,
+								since_id_str: new_since_id_str,
+								since_date: new_Date,
 								updated_at: new_Date
 							},
 							function(error,results,fields) {
@@ -167,6 +167,10 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 								}
 							}
 						);
+					}
+					else{
+						global.endFlag = 1;
+						resolved();
 					}
 				}
 				else{
@@ -183,11 +187,9 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 						}
 					);
 				}
-				global.endFlag = 1;
-				resolved();
 			}
 			else{
-				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_st, new_max_id_str, id, new_since_id, new_since_id_str, new_Date);
+				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_str, new_max_id_str, id, new_since_id, new_since_id_str, new_Date);
 			}
 		}
 	});
