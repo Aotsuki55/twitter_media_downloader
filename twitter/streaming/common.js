@@ -16,6 +16,7 @@ exports.getTweet = function(twitter, connection, driver, db) {
 exports.getTweet2 = function(twitter, connection, driver, db) {
 	return new Promise(function(resolved, rejected){
 		let since_id_str = "";
+		let origin_since_id_str = "";
 		let max_id_str = "";
 		let id = 0;
 		connection.query(
@@ -31,6 +32,7 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 							if(results[0].newestId_str!=null)since_id_str=results[0].newestId_str;
 							if(results[0].oldestId_str!=null)max_id_str=results[0].oldestId_str;
 						}
+						origin_since_id_st = since_id_st;
 						if(since_id_str!=""){
 							var x=since_id_str.length-1;
 							since_id_str[x]--;
@@ -39,7 +41,7 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 								since_id_str[x] = '9';
 							}
 						}
-						getTimeline(resolved, rejected, twitter, connection, since_id_str, max_id_str, id);
+						getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_st, max_id_str, id);
 					}
 				);
 			}
@@ -47,7 +49,7 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 	})
 }
 
-function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_id_str, id, new_since_id = null, new_since_id_str = "", new_Date = null){
+function getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_st, max_id_str, id, new_since_id = null, new_since_id_str = "", new_Date = null){
 	console.log("max_id_str: " + max_id_str);
 	var databaseClientModule = require('./mysql.js');
 	let new_max_id_str = "";
@@ -58,11 +60,70 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 		// console.log(tweets);
 		if(error){
 			console.log(error);
+			if(id == 0){
+				if(max_id_str!=""){
+					connection.query(
+						'insert into updateId set ?',
+						{
+							newestId_str: origin_since_id_st,
+							oldestId_str: max_id_str,
+							updated_at: new_Date
+						},
+						function(error,results,fields) {
+							if(error) {
+								console.log(error);
+							}
+							else {
+								connection.query(
+									'update updateId set ? where `id`=0',
+									{
+										newestId: new_since_id,
+										newestId_str: new_since_id_str,
+										newestDate: new_Date,
+										updated_at: new_Date
+									},
+									function(error,results,fields) {
+										if(error) {
+											console.log(error);
+										}
+										else {
+											global.endFlag = 1;
+											resolved();
+										}
+									}
+								);
+							}
+						}
+					);
+				}
+				else{
+					resolved();
+				}
+			}
+			else{
+				connection.query(
+					'update updateId set ? where `id`='+id,
+					{
+						newestId_str: origin_since_id_st,
+						oldestId_str: max_id_str,
+						updated_at: new_Date
+					},
+					function(error,results,fields) {
+						if(error) {
+							console.log(error);
+						}
+						else {
+							global.endFlag = 1;
+							resolved();
+						}
+					}
+				);
+			}
 		}
 		else{
 			var flag = false;
 			for(data in tweets) {
-				if(!judgeString(since_id_str,tweets[data].id_str)){
+				if(!judgeString(origin_since_id_st,tweets[data].id_str)){
 					console.log("end: "+tweets[data].id_str);
 					flag = true;
 					break;
@@ -75,7 +136,7 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 						databaseClientModule.saveTweet(formatTweet(tweets[data]), connection);
 					}
 				}
-				
+
 				if(judgeString(new_since_id_str, tweets[data].id_str)){
 					new_since_id = BigInt(tweets[data].id);
 					new_since_id_str = tweets[data].id_str;
@@ -86,15 +147,31 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 				}
 			}
 			if(flag || max_id_str==new_max_id_str||tweets.length==0||tweets.length==1){
-				if(new_since_id_str!=""){
+				if(id==0){
+					if(new_since_id_str!=""){
+						connection.query(
+							'update updateId set ? where `id`='+id,
+							{
+								newestId: new_since_id,
+								newestId_str: new_since_id_str,
+								newestDate: new_Date,
+								updated_at: new_Date
+							},
+							function(error,results,fields) {
+								if(error) {
+									console.log(error);
+								}
+								else {
+									global.endFlag = 1;
+									resolved();
+								}
+							}
+						);
+					}
+				}
+				else{
 					connection.query(
-						'update updateId set ?',
-						{
-							newestId: new_since_id,
-							newestId_str: new_since_id_str,
-							newestDate: new_Date,
-							updated_at: new_Date
-						},
+						'delete from updateId where `id`='+id,
 						function(error,results,fields) {
 							if(error) {
 								console.log(error);
@@ -110,7 +187,7 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, max_
 				resolved();
 			}
 			else{
-				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, new_max_id_str, id, new_since_id, new_since_id_str, new_Date);
+				if(tweets.length!=0) getTimeline(resolved, rejected, twitter, connection, since_id_str, origin_since_id_st, new_max_id_str, id, new_since_id, new_since_id_str, new_Date);
 			}
 		}
 	});
@@ -151,7 +228,7 @@ function formatTweet(data) {
 
 	if(data.geo != null) {
 		data.geo = JSON.stringify(data.entities.geo);
-	} 
+	}
 	if(data.coordinates != null) {
 		data.coordinates = JSON.stringify(data.entities.coordinates);
 	}
@@ -176,7 +253,7 @@ function formatDate(date) {
 	var str = obj.getFullYear();
 	str += '-';
 	str += parseInt(obj.getMonth()) + 1;
-	str += '-'; 
+	str += '-';
 	str += obj.getDate();
 	str += ' ';
 	str += obj.getHours();
