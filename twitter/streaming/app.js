@@ -1,11 +1,13 @@
 var nconf = require('nconf');
+console.log("Start");
 nconf.use('file', {
     file: '../../config/app.json'
 });
+
 global.endFlag = 0;
 nconf.load(function (err, conf) {
-    if (err) { 
-    	throw err; 
+    if (err) {
+    	throw err;
     }
 
     var twitterModule = require('../connect.js');
@@ -21,7 +23,7 @@ nconf.load(function (err, conf) {
 		if(conf.create_media_table) dbModule.createMediaTable(connection, nconf);
 		if(conf.create_updateId_table) dbModule.createUpdateIdTable(connection, nconf);
 		streamingModule.getTweet2(twitter, connection, "mysql", null).then(function(){
-			
+
 			var downloadModule = require('./download.js');
 			console.log("Start downloadMedia.");
 			downloadModule.downloadMedia(connection);

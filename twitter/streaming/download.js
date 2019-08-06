@@ -36,7 +36,7 @@ exports.downloadMedia = function(connection) {
 			connection.query('SELECT * FROM `media` WHERE `is_downloaded` = 0', function (error, results, fields) {
 				var user_names = {};
 				for(data in results) {
-					user_names[results[data].user_id_str] = results[data].user_name.replace(/\//g, '\\') + "(" + results[data].user_id_str + ")";
+					user_names[results[data].user_id_str] = results[data].user_name.replace(/\//g, '-') + "(" + results[data].user_id_str + ")";
 				}
 				fs.readdir(download_path, function(err, files){
 					if (err) throw err;
@@ -110,7 +110,7 @@ exports.downloadMedia = function(connection) {
 			});
 		});
 	});
-	
+
 }
 
 function download(url, path, filename, media_id_str, fs, request, connection) {
@@ -128,7 +128,7 @@ function download(url, path, filename, media_id_str, fs, request, connection) {
 			function(error,results,fields) {
 				if(error) {
 					console.log(error);
-				} 
+				}
 			}
 		);
     }));
