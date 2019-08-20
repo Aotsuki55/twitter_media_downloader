@@ -6,25 +6,73 @@ exports.downloadMedia = function(connection) {
 		var request = require('request');
 		var sql = 'update media set `is_downloaded` = 1 where `media_id_str` in ("';
 		var sql2 = '")';
-		var ids = []
-		var promiseDownload = function(url, path, filename, media_id_str, fs, request, connection){
+		var ids = [];
+		var promises2 = [];
+		var download = function(url, path, filename, media_id_str, fs, request, resolve, reject) {
+			var write = fs.createWriteStream(path + '/' + filename);
+			var f=0;
+			request.get(url).on('response', function (res) {
+				if(res.statusCode==200){
+					f=1;
+				}
+				else{
+					console.log('statusCode: ', res.statusCode);
+					connection.query(
+						'update media set `error` = ' + res.statusCode + ', `is_downloaded` = 1 where `media_id_str` = ' + media_id_str,
+						function(error,results,fields) {
+							if(error){
+								console.log(error);
+								reject();
+							}
+							else {
+								promises2.push(fs.unlinkAsync(path + '/' + filename, (err) => {
+									if (err) throw err;
+									resolve();
+								}));
+							}
+						}
+					);
+				}
+			})
+			.pipe(write.on('error', function(){
+				console.log("ERROR:" + err);
+				reject();
+			}).on('finish', function(){
+				if(f==1){
+					ids.push(media_id_str);
+					resolve();
+				}
+			}));
+		}
+		var promiseDownload = function(url, path, filename, media_id_str, fs, request){
 			return new Promise(function(resolve, reject){
 				var write = fs.createWriteStream(path + '/' + filename);
+				var f=0;
 				request.get(url).on('response', function (res) {
-					if(res.statusCode!=200){
+					if(res.statusCode==200){
+						f=1;
+					}
+					else if(res.statusCode==404){
+						console.log('statusCode: ' + res.statusCode + " " + url);
+						var exts = url.match(/^https?:[^:?]+/);
+						if(exts) url = exts[0];
+						promises2.push(download(url, path, filename, media_id_str, fs, request, resolve, reject));
+					}
+					else{
 						console.log('statusCode: ', res.statusCode);
 						console.log('content-length: ', res.headers['content-length']);
 						reject();
 					}
 				})
-				.pipe(write.on('finish',function(){
-					ids.push(media_id_str);
-					resolve();
-				},'error',function(){
+				.pipe(write.on('error', function(){
 					console.log("ERROR:" + err);
 					reject();
-				}
-				));
+				}).on('finish', function(){
+					if(f==1){
+						ids.push(media_id_str);
+						resolve();
+					}
+				}));
 			})
 		  };
 		Nconf.use('file', {
@@ -33,8 +81,10 @@ exports.downloadMedia = function(connection) {
 		Nconf.load(function (err, conf) {
 			if(err) throw err;
 			var download_path = conf.download_path;
-			connection.query('SELECT * FROM `media` WHERE `is_downloaded` = 0', function (error, results, fields) {
+			connection.query('SELECT * FROM `media` WHERE `is_downloaded` = 0 limit 100', function (error, results, fields) {
 				var user_names = {};
+				var count = results.length;
+				console.log(results.length);
 				for(data in results) {
 					user_names[results[data].user_id_str] = results[data].user_name.replace(/\//g, '\\') + "(" + results[data].user_id_str + ")";
 				}
@@ -59,28 +109,28 @@ exports.downloadMedia = function(connection) {
 					}
 					Promise.all(promises).catch(function(err) {console.log("100:" + err);}).then(function() {
 						console.log("Download start!");
-						var promises2 = [];
 						for(data in results){
 							var ext = "";
 							var url = results[data].download_url;
 							var exts = url.match(/[^.]+$/);
 							if(exts){
-								var extss = exts[0].match(/^[^:]+/);
-								if(exts) ext = extss[0];
+								var extss = exts[0].match(/^[^:?]+/);
+								if(extss) ext = extss[0];
 							}
 							if(ext==""){
 								console.log("file extension error");
 								continue;
 							}
 							var path = download_path + "/" + user_names[results[data].user_id_str];
-							var filename = results[data].media_id_str;
+							var filename = results[data].tweet_id_str;
 							if(results[data].photo_number) filename += "-" + results[data].photo_number;
 							filename += "." + ext;
 							var media_id_str = results[data].media_id_str;
-							promises2.push(promiseDownload(url, path, filename, media_id_str, fs, request, connection));
+							promises2.push(promiseDownload(url, path, filename, media_id_str, fs, request));
 							// download(url, path, filename, media_id_str, fs, request, connection);
 						}
-						Promise.all(promises2, {concurrency: 5}).then(function() {
+						Promise.all(promises2, {concurrency: 5}).catch(function(err) {console.log("150:" + err);}).then(function() {
+							console.log("Start save database.");
 							return new Promise(function(resolve, reject){
 								for(var x=0;x<ids.length;x++){
 									if(x!=0) sql += '","';
@@ -90,7 +140,7 @@ exports.downloadMedia = function(connection) {
 								connection.query(
 									sql,
 									function(error,results,fields) {
-										if(err){
+										if(error){
 											console.log(error);
 											reject();
 										}
@@ -99,11 +149,14 @@ exports.downloadMedia = function(connection) {
 								);
 							});
 						}).then(function() {
-							if(global.endFlag){
+							if(count != 0){
+								exports.downloadMedia(connection);
+							}
+							else{
 								console.log("Download successfully!!!");
 								process.exit(0);
+								resolved();
 							}
-							resolved();
 						});
 					});
 				});
@@ -111,25 +164,4 @@ exports.downloadMedia = function(connection) {
 		});
 	});
 	
-}
-
-function download(url, path, filename, media_id_str, fs, request, connection) {
-	var write = fs.createWriteStream(path + '/' + filename);
-	request.get(url).on('response', function (res) {
-		// console.log('statusCode: ', res.statusCode);
-		// console.log('content-length: ', res.headers['content-length']);
-	})
-	.pipe(write.on('finish',function(){
-		connection.query(
-			'update media set ? where `media_id_str` = "' + media_id_str + '" ',
-			{
-				is_downloaded: 1
-			},
-			function(error,results,fields) {
-				if(error) {
-					console.log(error);
-				} 
-			}
-		);
-    }));
 }

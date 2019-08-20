@@ -33,7 +33,8 @@ exports.saveTweet = function(data, connection) {
 			is_retweeted: data.retweeted,
 			is_favorited: data.favorited,
 			is_sensitive: data.is_sensitive,
-			lang: data.lang
+			lang: data.lang,
+			updated_at: data.updatedAt
 		},
 		function(error,results,fields) {
 			if(error && error.code!="ER_DUP_ENTRY") {
@@ -57,7 +58,7 @@ function saveMedia(data, connection) {
 					media.video_info.video_bitrate = media.video_info.variants[j].bitrate;
 					media.video_info.video_content_type = media.video_info.variants[j].content_type;
 					media.video_info.video_url = media.video_info.variants[j].url;
-					video_bitrate = media.video_info.variants[j].bitrate;
+					video_bitrate = media.video_info.variants[j].bitrate!=null?media.video_info.variants[j].bitrate:-1;
 				}
 			}
 			media.download_url = media.video_info.video_url;
@@ -100,6 +101,7 @@ function saveMedia(data, connection) {
 				video_url: media.video_info!=null?media.video_info.video_url:null,
 				additional_media_info: media.additional_media_info!=null?JSON.stringify(media.additional_media_info):null,
 
+				updated_at: data.updatedAt,
 				is_downloaded: 0
 			},
 			function(error,results,fields) {
