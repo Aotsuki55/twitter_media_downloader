@@ -24,7 +24,7 @@ exports.connect = function(connection, callback) {
 exports.createTweetTable = function(connection, nconf) {
 	var sql = 'create table tweet ('
 				+ 'tweet_id bigint, '
-		 		+ 'tweet_id_str varchar(30), '
+		 		+ 'tweet_id_str varchar(30) unique key, '
 		 		+ 'user_id bigint , '
 			 	+ 'user_id_str varchar(30), '
 			 	+ 'user_name varchar(52) character set utf8mb4 , '
@@ -54,7 +54,8 @@ exports.createTweetTable = function(connection, nconf) {
 			 	+ 'is_retweeted boolean, '
 			 	+ 'is_favorited boolean, '
 			 	+ 'is_sensitive boolean, '
-				+ 'lang varchar(10) '
+				+ 'lang varchar(10), '
+				+ 'updated_at datetime'
 			 	+ ') default charset=utf8mb4;';
 	connection.query(sql, function (error, results, fields) {
 		if(error) {
@@ -71,7 +72,7 @@ exports.createTweetTable = function(connection, nconf) {
 exports.createMediaTable = function(connection, nconf) {
 	var sql = 'create table media ('
 				+ 'media_id bigint, '
-				+ 'media_id_str varchar(30), '
+				+ 'media_id_str varchar(30) unique key, '
 				+ 'download_url text, '
 				+ 'photo_number int, '
 
@@ -101,7 +102,9 @@ exports.createMediaTable = function(connection, nconf) {
 				+ 'video_content_type text, '
 				+ 'video_url text, '
 				+ 'additional_media_info text, '
-				+ 'is_downloaded boolean'
+				+ 'updated_at datetime, '
+				+ 'is_downloaded boolean, '
+				+ 'error int'
 			 	+ ') default charset=utf8mb4;';
 	connection.query(sql, function (error, results, fields) {
 		if(error) {

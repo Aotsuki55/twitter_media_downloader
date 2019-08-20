@@ -4,9 +4,9 @@ exports.getTweet = function(twitter, connection, driver, db) {
 	  		// if(data.lang == 'ja') {
     			var databaseClientModule = require('./' + driver + '.js');
     			if(driver != 'mongo') {
- 					databaseClientModule.saveTweet(formatTweet(data), connection);
+ 					databaseClientModule.saveTweet(formatTweet(data, new Date()), connection);
  				} else {
- 					databaseClientModule.saveTweet(formatTweet(data), db);
+ 					databaseClientModule.saveTweet(formatTweet(data, new Date()), db);
  				}
 			// }
 	  	});
@@ -53,10 +53,12 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 	console.log("max_id_str: " + max_id_str);
 	var databaseClientModule = require('./mysql.js');
 	let new_max_id_str = "";
+	let mode = 0;
 	let params = {count: 200};
+	if(mode == 1) params.id = "2411778596";
 	if(since_id_str!="") params.since_id = since_id_str;
 	if(max_id_str!="") params.max_id = max_id_str;
-	twitter.get('statuses/home_timeline', params, function(error, tweets, response) {
+	twitter.get(mode == 0 ? 'statuses/home_timeline' :'statuses/user_timeline', params, function(error, tweets, response) {
 		// console.log(tweets);
 		if(error){
 			console.log(error);
@@ -122,6 +124,7 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 		}
 		else{
 			var flag = false;
+			var now = new Date();
 			for(data in tweets) {
 				if(!judgeString(origin_since_id_str,tweets[data].id_str)){
 					console.log("end: "+tweets[data].id_str);
@@ -130,10 +133,10 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 				}
 				if(tweets[data].extended_entities) {
 					if(tweets[data].retweeted_status!=null){
-						databaseClientModule.saveTweet(formatTweet(tweets[data].retweeted_status), connection);
+						databaseClientModule.saveTweet(formatTweet(tweets[data].retweeted_status,now), connection);
 					}
 					else{
-						databaseClientModule.saveTweet(formatTweet(tweets[data]), connection);
+						databaseClientModule.saveTweet(formatTweet(tweets[data],now), connection);
 					}
 				}
 
@@ -195,9 +198,9 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 	});
 }
 
-function formatTweet(data) {
+function formatTweet(data, now) {
 	data.createdAt = formatDate(data.created_at);
-
+	data.updatedAt = formatDateNow(now);
 	if(data.entities.hashtags.length != 0) {
 		data.entities.hashtags = JSON.stringify(data.entities.hashtags);
 	} else {
@@ -252,6 +255,21 @@ function formatTweet(data) {
 
 function formatDate(date) {
 	var obj = new Date(Date.parse(date));
+	var str = obj.getFullYear();
+	str += '-';
+	str += parseInt(obj.getMonth()) + 1;
+	str += '-';
+	str += obj.getDate();
+	str += ' ';
+	str += obj.getHours();
+	str += ':';
+	str += obj.getMinutes();
+	str += ':';
+	str += obj.getSeconds();
+	return str;
+}
+
+function formatDateNow(obj) {
 	var str = obj.getFullYear();
 	str += '-';
 	str += parseInt(obj.getMonth()) + 1;
