@@ -89,7 +89,6 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 											console.log(error);
 										}
 										else {
-											global.endFlag = 1;
 											resolved();
 										}
 									}
@@ -115,7 +114,6 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 							console.log(error);
 						}
 						else {
-							global.endFlag = 1;
 							resolved();
 						}
 					}
@@ -165,14 +163,12 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 									console.log(error);
 								}
 								else {
-									global.endFlag = 1;
 									resolved();
 								}
 							}
 						);
 					}
 					else{
-						global.endFlag = 1;
 						resolved();
 					}
 				}
@@ -184,7 +180,6 @@ function getTimeline(resolved, rejected, twitter, connection, since_id_str, orig
 								console.log(error);
 							}
 							else {
-								global.endFlag = 1;
 								resolved();
 							}
 						}

@@ -2,7 +2,6 @@ var nconf = require('nconf');
 nconf.use('file', {
     file: '../../config/app.json'
 });
-global.endFlag = 0;
 nconf.load(function (err, conf) {
     if (err) { 
     	throw err; 
