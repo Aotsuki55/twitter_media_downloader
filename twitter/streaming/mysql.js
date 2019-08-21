@@ -34,6 +34,7 @@ exports.saveTweet = function(data, connection) {
 			is_favorited: data.favorited,
 			is_sensitive: data.is_sensitive,
 			lang: data.lang,
+			saved_at: data.updatedAt,
 			updated_at: data.updatedAt
 		},
 		function(error,results,fields) {
@@ -82,6 +83,8 @@ function saveMedia(data, connection) {
 				user_screen_name: data.user.screen_name,
 				content: data.text, 
 				created_at: data.createdAt,
+				retweet_count: data.retweet_count,
+				favorite_count: data.favorite_count,
 				is_sensitive: data.is_sensitive,
 				lang: data.lang,
 
@@ -101,6 +104,7 @@ function saveMedia(data, connection) {
 				video_url: media.video_info!=null?media.video_info.video_url:null,
 				additional_media_info: media.additional_media_info!=null?JSON.stringify(media.additional_media_info):null,
 
+				saved_at: data.updatedAt,
 				updated_at: data.updatedAt,
 				is_downloaded: 0
 			},
@@ -111,7 +115,6 @@ function saveMedia(data, connection) {
 			}
 		);
 	}
-	global.endFlag = 1;
 }
 
 exports.saveDate = function(data, connection) {

@@ -55,6 +55,7 @@ exports.createTweetTable = function(connection, nconf) {
 			 	+ 'is_favorited boolean, '
 			 	+ 'is_sensitive boolean, '
 				+ 'lang varchar(10), '
+				+ 'saved_at datetime, '
 				+ 'updated_at datetime'
 			 	+ ') default charset=utf8mb4;';
 	connection.query(sql, function (error, results, fields) {
@@ -84,6 +85,8 @@ exports.createMediaTable = function(connection, nconf) {
 			 	+ 'user_screen_name varchar(16) character set utf8mb4 , '
 			 	+ 'content text character set utf8mb4 , '
 				+ 'created_at datetime, '
+				+ 'retweet_count integer, '
+			 	+ 'favorite_count integer, '
 				+ 'is_sensitive boolean, '
 				+ 'lang varchar(10), '
 				 
@@ -102,6 +105,7 @@ exports.createMediaTable = function(connection, nconf) {
 				+ 'video_content_type text, '
 				+ 'video_url text, '
 				+ 'additional_media_info text, '
+				+ 'saved_at datetime, '
 				+ 'updated_at datetime, '
 				+ 'is_downloaded boolean, '
 				+ 'error int'
