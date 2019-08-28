@@ -3,6 +3,7 @@ exports.downloadMedia = function(connection) {
 		var Nconf = require('nconf');
 		var Promise = require("bluebird");
 		var fs = Promise.promisifyAll(require("fs"));
+		var childProcess = Promise.promisifyAll(require('child_process'));
 		var request = require('request');
 		var sql = 'update media set `is_downloaded` = 1 where `media_id_str` in ("';
 		var sql2 = '")';
@@ -18,7 +19,7 @@ exports.downloadMedia = function(connection) {
 				else{
 					console.log('statusCode: ', res.statusCode);
 					connection.query(
-						'update media set `error` = ' + res.statusCode + ', `is_downloaded` = 1 where `media_id_str` = ' + media_id_str,
+						'update media set `error` = ' + res.statusCode + ', `is_downloaded` = -1 where `media_id_str` = ' + media_id_str,
 						function(error,results,fields) {
 							if(error){
 								console.log(error);
@@ -74,19 +75,53 @@ exports.downloadMedia = function(connection) {
 					}
 				}));
 			})
-		  };
+		};
+		var userUpdate = function(type, user_id, user_name, user_screen_name, updated_at){
+			return new Promise(function(resolve, reject){
+				var sql3 = "";
+				var parms = {
+					user_name: user_name,
+					user_screen_name: user_screen_name,
+					updated_at: updated_at
+				};
+				if(type==0){
+					sql3 = 'insert into user set ?';
+					parms.user_id_str = user_id;
+				}
+				else{
+					sql3 = 'update user set ? where `user_id_str` = "' + user_id + '"';
+				}
+				connection.query(
+					sql3, parms,
+					function(error,results,fields) {
+						if(error){
+							console.log(error);
+							reject();
+						}
+						else {
+							resolve();
+						}
+					}
+				);
+			})
+		};
 		Nconf.use('file', {
 			file: '../../config/app.json'
 		});
 		Nconf.load(function (err, conf) {
 			if(err) throw err;
 			var download_path = conf.download_path;
+			var link_path = conf.link_path;
 			connection.query('SELECT * FROM `media` WHERE `is_downloaded` = 0 limit 100', function (error, results, fields) {
 				var user_names = {};
+				var user_screen_names = {};
+				var updated_ats = {};
 				var count = results.length;
 				console.log(results.length);
 				for(data in results) {
-					user_names[results[data].user_id_str] = results[data].user_name.replace(/\//g, '\\') + "(" + results[data].user_id_str + ")";
+					user_names[results[data].user_id_str] = results[data].user_name.replace(/\//g, '／').replace(/:/g, ';')  + "(" + results[data].user_id_str + ")";
+					user_screen_names[results[data].user_id_str] = results[data].user_screen_name;
+					updated_ats[results[data].user_id_str] = results[data].saved_at;
 				}
 				fs.readdir(download_path, function(err, files){
 					if (err) throw err;
@@ -99,15 +134,23 @@ exports.downloadMedia = function(connection) {
 						}
 					}
 					var promises = [];
+					var promisesUser = [];
+					var promisesLink = [];
 					for(user_name in user_names){
 						if(fileId[user_name] == null){
 							promises.push(fs.mkdirAsync(download_path + "/" +　user_names[user_name]));
+							promisesUser.push(userUpdate(0, user_name, user_names[user_name], user_screen_names[user_name], updated_ats[user_name]));
+							promisesLink.push(childProcess.execAsync("ln -nfs '"+download_path+"/"+user_names[user_name].replace(/'/g, '\'\"\'\"\'')+"' '"+link_path+"/"+user_name+"'"));
 						}
 						else if(fileId[user_name] != user_names[user_name]){
 							promises.push(fs.renameAsync(download_path + "/" + fileId[user_name], download_path + "/" + user_names[user_name]));
+							promisesUser.push(userUpdate(1, user_name, user_names[user_name], user_screen_names[user_name], updated_ats[user_name]));
+							promisesLink.push(childProcess.execAsync("ln -nfs '"+download_path+"/"+user_names[user_name].replace(/'/g, '\'\"\'\"\'')+"' '"+link_path+"/"+user_name+"'"));
 						}
 					}
-					Promise.all(promises).catch(function(err) {console.log("100:" + err);}).then(function() {
+					Promise.all(promises).catch(function(err) {console.log("100:" + err);}).
+					all(promisesUser).catch(function(err) {console.log("150:" + err);}).
+					all(promisesLink).catch(function(err) {console.log("180:" + err);}).then(function() {
 						console.log("Download start!");
 						for(data in results){
 							var ext = "";

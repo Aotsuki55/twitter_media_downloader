@@ -76,6 +76,7 @@ exports.createMediaTable = function(connection, nconf) {
 				+ 'media_id_str varchar(30) unique key, '
 				+ 'download_url text, '
 				+ 'photo_number int, '
+				+ 'filename text, '
 
 				+ 'tweet_id bigint, '
 		 		+ 'tweet_id_str varchar(30), '
@@ -141,6 +142,30 @@ exports.createUpdateIdTable = function(connection, nconf) {
 		} else {
 			console.log('updateId table is successfully created.');
 			nconf.set('create_updateId_table', false);
+			nconf.save();
+		}
+	});
+}
+
+exports.createUserTable = function(connection, nconf) {
+	var sql = 'CREATE TABLE `user` ('
+		+ 'user_id_str varchar(30) unique key, '
+		+ 'user_name varchar(52) character set utf8mb4 , '
+		+ 'user_screen_name varchar(16) character set utf8mb4 , '
+
+		+ '`max_id_str` varchar(30) DEFAULT NULL,'
+		+ '`since_id_str` varchar(30) DEFAULT NULL,'
+
+		+ '`all_downloaded` int DEFAULT NULL,'
+		+ '`updated_at` datetime DEFAULT NULL'
+		+ ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
+	connection.query(sql, function (error, results, fields) {
+		if(error) {
+			console.log('failed to create user table.');
+			console.log(error);
+		} else {
+			console.log('user table is successfully created.');
+			nconf.set('create_user_table', false);
 			nconf.save();
 		}
 	});
