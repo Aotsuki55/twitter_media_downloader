@@ -52,6 +52,8 @@ function saveMedia(data, connection) {
 	for(var i=0;i<data.extended_entities.media.length;i++){
 		var photo_number = data.extended_entities.media.length==1 ? null : i+1;
 		var media = data.extended_entities.media[i];
+		var filename = data.id_str;
+		if(photo_number!=null) filename += "-" + photo_number;
 		if(media.type=="video"||media.type=="animated_gif"){
 			var video_bitrate = -1;
 			for(var j=0;j<media.video_info.variants.length;j++){
@@ -67,6 +69,16 @@ function saveMedia(data, connection) {
 		else{
 			media.download_url = media.media_url + ":large";
 		}
+		var ext = "";
+		var url = media.download_url;
+		var exts = url.match(/[^.]+$/);
+		if(exts){
+			var extss = exts[0].match(/^[^:?]+/);
+			if(extss) ext = extss[0];
+		}
+		if(ext!=""){
+			filename += "." + ext;
+		}
 		connection.query(
 			"insert into media set ?" ,
 			{
@@ -74,6 +86,7 @@ function saveMedia(data, connection) {
 				media_id_str: media.id_str,
 				download_url: media.download_url,
 				photo_number: photo_number,
+				filename: filename,
 
 				tweet_id: BigInt(data.id), 
 				tweet_id_str: data.id_str,

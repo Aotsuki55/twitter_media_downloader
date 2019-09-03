@@ -30,5 +30,7 @@
   "create_table": false,
   "create_media_table": false,
   "create_updateId_table": false,
-  "download_path": "/Users/miyajimamasahiro/Desktop/twitter"
+  "create_user_table": false,
+  "download_path": "/Users/miyajimamasahiro/Desktop/twitter",
+  "link_path": "/Users/miyajimamasahiro/MyApplications/TweetMediaViewer/public/twitter"
 }
