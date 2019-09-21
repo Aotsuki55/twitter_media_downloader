@@ -109,7 +109,8 @@ exports.createMediaTable = function(connection, nconf) {
 				+ 'saved_at datetime, '
 				+ 'updated_at datetime, '
 				+ 'is_downloaded boolean, '
-				+ 'error int'
+				+ 'error int, '
+				+ 'status int'
 			 	+ ') default charset=utf8mb4;';
 	connection.query(sql, function (error, results, fields) {
 		if(error) {
