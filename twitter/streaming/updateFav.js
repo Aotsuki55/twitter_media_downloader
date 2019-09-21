@@ -13,7 +13,7 @@ exports.updateTweet = function(twitter, connection) {
 					function(error,results,fields) {
 						if(error){
 							console.log(error);
-							reject();
+							resolve();
 						}
 						else {
 							resolve();
@@ -74,7 +74,7 @@ exports.updateTweet = function(twitter, connection) {
 												function(error,results,fields) {
 													if(error){
 														console.log(error);
-														reject();
+														resolve();
 													}
 													else {
 														resolve();
