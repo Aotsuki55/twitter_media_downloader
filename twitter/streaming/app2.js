@@ -2,6 +2,22 @@ var nconf = require('nconf');
 nconf.use('file', {
     file: '../../config/app.json'
 });
+console.log("");
+console.log("");
+console.log("///////////////////////////////////////");
+var obj = new Date();
+var str = obj.getFullYear();
+str += '-';
+str += ('0' + (parseInt(obj.getMonth()) + 1)).slice(-2);
+str += '-';
+str += ('0' + obj.getDate()).slice(-2);
+str += ' ';
+str += ('0' + obj.getHours()).slice(-2);
+str += ':';
+str += ('0' + obj.getMinutes()).slice(-2);
+str += ':';
+str += ('0' + obj.getSeconds()).slice(-2);
+console.log(str);
 global.f=0;
 nconf.load(function (err, conf) {
     if (err) { 
