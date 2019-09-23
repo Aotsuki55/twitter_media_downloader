@@ -34,8 +34,8 @@ nconf.load(function (err, conf) {
 	var deleteModule = require('./delete.js');
 	var Promise = require("bluebird");
 	dbModule.connect(connection, function() {
-		console.log("Start update.");
 		deleteModule.deleteTweet(twitter, connection).then(function(){
+			console.log("Start update.");
 			streamingModule.updateTweet(twitter, connection);
 		});
 	});
