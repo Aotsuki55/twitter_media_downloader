@@ -65,14 +65,14 @@ exports.deleteTweet = function(twitter, connection) {
 												else {
 													console.log(mediaId);
 													console.log("Delete successfully!!!");
-													process.exit(0);
+													resolved();
 												}
 											}
 										);
 									}
 									else{
 										console.log("Delete successfully!!!");
-										process.exit(0);
+										resolved();
 									}
 								});
 							});
@@ -80,7 +80,7 @@ exports.deleteTweet = function(twitter, connection) {
 					}
 					else{
 						console.log("Delete successfully!!!");
-						process.exit(0);
+						resolved();
 					}
 				}
 			}

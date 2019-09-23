@@ -32,8 +32,8 @@ exports.updateTweet = function(twitter, connection) {
 				else {
 					if(results.length==0){
 						console.log("Update successfully!!!");
-						resolved();
-						// process.exit(0);
+						// resolved();
+						process.exit(0);
 					}
 					else{
 						var ids = results.map(function (result) {return result.tweet_id_str});
@@ -49,8 +49,8 @@ exports.updateTweet = function(twitter, connection) {
 						twitter.get('statuses/lookup', params, function(error, tweets, response) {
 							if(error){
 								console.log(error);
-								resolved();
-								// process.exit(0);
+								// resolved();
+								process.exit(0);
 							}
 							else{
 								var promises = [];
@@ -91,8 +91,8 @@ exports.updateTweet = function(twitter, connection) {
 									}
 									else{
 										console.log("Update successfully!!!");
-										resolved();
-										// process.exit(0);
+										// resolved();
+										process.exit(0);
 									}
 								});
 							}
