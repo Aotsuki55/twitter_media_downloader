@@ -16,6 +16,6 @@
   "create_media_table": true,
   "create_updateId_table": true,
   "create_user_table": true,
-  "download_path": "/Users/xxxxxxx/xxxxxxxx/twitter",
-  "link_path": "/Users/xxxxxxxxxx/TweetMediaViewer/public/twitter"
+  "download_path": "/Users/xxxxxxx/xxxxxxxx/twitter",     //画像のダウンロード先のフォルダ
+  "link_path": "/Users/xxxxxxxxxx/TweetMediaViewer/public/twitter"     //TweetMediaViewerとの連携用
 }
