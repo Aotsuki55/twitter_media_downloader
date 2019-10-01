@@ -2,6 +2,10 @@
 TimeLineに流れている画像を収集します  
 [TweetMediaViewer](https://github.com/Aotsuki55/TweetMediaViewer)とあわせて使って下さい  
 
+**注意  
+TwitterAPI登録が必要です  
+面倒くさい人は個人的に相談して下さい**  
+
 ## 動作環境
 Node.js 10.14.0  
 MySQL 14.14
