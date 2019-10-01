@@ -1,4 +1,7 @@
-# How to use
+# TwitterMediaDownloader
+TimeLineに流れている画像を収集します。
 
-Node.jsでルンバ作った
-http://qiita.com/sakuraya/items/3269bf60fd59406c4e1e
+# 使い方
+
+初期設定
+
