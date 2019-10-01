@@ -1,0 +1,21 @@
+{
+  "driver": "mysql",
+  "mysql": {
+    "host": "localhost",
+    "user": "xxxxxx",
+    "password": "xxxxxx",
+    "database": "Twitter_Dev"
+  },
+  "twitter": {
+    "consumer_key": "xxxxxxxxxxxxxxxxxx",
+    "consumer_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "access_token_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "create_table": false,
+  "create_media_table": false,
+  "create_updateId_table": false,
+  "create_user_table": false,
+  "download_path": "/Users/xxxxxxx/xxxxxxxx/twitter",
+  "link_path": "/Users/xxxxxxxxxx/TweetMediaViewer/public/twitter"
+}

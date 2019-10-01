@@ -1,3 +1,4 @@
 node_modules/*
-config/
+config/*
+!config/app.json.sample
 package-lock.json
