@@ -34,6 +34,7 @@ nconf.load(function (err, conf) {
 		if(conf.create_table) dbModule.createTweetTable(connection, nconf);
 		if(conf.create_media_table) dbModule.createMediaTable(connection, nconf);
 		if(conf.create_updateId_table) dbModule.createUpdateIdTable(connection, nconf);
+		if(conf.create_user_table) dbModule.createUserTable(connection, nconf);
 		googleModule.getInstance(conf, nconf).then(function(){
 			streamingModule.getTweet2(twitter, connection, "mysql", null).then(function(){
 			
