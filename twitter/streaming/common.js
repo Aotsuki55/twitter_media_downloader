@@ -28,7 +28,7 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 						let origin_since_id_str = "";
 						let max_id_str = "";
 						if(error) console.log(error);
-						else{
+						else if(results.length){
 							if(results[0].since_id_str!=null)since_id_str=results[0].since_id_str;
 							if(results[0].max_id_str!=null)max_id_str=results[0].max_id_str;
 						}
