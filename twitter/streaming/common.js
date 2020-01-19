@@ -15,9 +15,6 @@ exports.getTweet = function(twitter, connection, driver, db) {
 
 exports.getTweet2 = function(twitter, connection, driver, db) {
 	return new Promise(function(resolved, rejected){
-		let since_id_str = "";
-		let origin_since_id_str = "";
-		let max_id_str = "";
 		let id = 0;
 		connection.query(
 			'SELECT max(id) FROM `updateId`',
@@ -27,6 +24,9 @@ exports.getTweet2 = function(twitter, connection, driver, db) {
 				connection.query(
 					'SELECT * FROM `updateId` where `id` = ' + id,
 					function (error, results, fields) {
+						let since_id_str = "";
+						let origin_since_id_str = "";
+						let max_id_str = "";
 						if(error) console.log(error);
 						else{
 							if(results[0].since_id_str!=null)since_id_str=results[0].since_id_str;
