@@ -15,7 +15,7 @@
   "google": {
     "CLIENT_ID": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "CLIENT_SECRET": "xxxxxxxxxxxxxxxxxx",
-    "REDIRECT_URL ": "http://localhost"
+    "REDIRECT_URL": "http://localhost"
   },
   "create_table": true,
   "create_media_table": true,
