@@ -77,6 +77,7 @@ exports.createMediaTable = function(connection, nconf) {
 				+ 'download_url text, '
 				+ 'photo_number int, '
 				+ 'filename text, '
+				+ 'google_photo_id text,'
 
 				+ 'tweet_id bigint, '
 		 		+ 'tweet_id_str varchar(30), '
@@ -156,6 +157,7 @@ exports.createUserTable = function(connection, nconf) {
 
 		+ '`max_id_str` varchar(30) DEFAULT NULL,'
 		+ '`since_id_str` varchar(30) DEFAULT NULL,'
+		+ 'google_photo_album_id text,'
 
 		+ '`all_downloaded` int DEFAULT NULL,'
 		+ '`updated_at` datetime DEFAULT NULL'

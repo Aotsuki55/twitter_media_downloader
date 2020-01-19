@@ -19,10 +19,9 @@ str += ':';
 str += ('0' + obj.getSeconds()).slice(-2);
 console.log(str);
 nconf.load(function (err, conf) {
-    if (err) { 
-    	throw err; 
-    }
-
+	if (err) throw err; 
+	
+	var googleModule = require('./google.js');
     var twitterModule = require('../connect.js');
     var twitter = twitterModule.getInstance(conf);
 
@@ -35,11 +34,14 @@ nconf.load(function (err, conf) {
 		if(conf.create_table) dbModule.createTweetTable(connection, nconf);
 		if(conf.create_media_table) dbModule.createMediaTable(connection, nconf);
 		if(conf.create_updateId_table) dbModule.createUpdateIdTable(connection, nconf);
-		streamingModule.getTweet2(twitter, connection, "mysql", null).then(function(){
+		googleModule.getInstance(conf, nconf).then(function(){
+			streamingModule.getTweet2(twitter, connection, "mysql", null).then(function(){
 			
-			var downloadModule = require('./download.js');
-			console.log("Start downloadMedia.");
-			downloadModule.downloadMedia(connection);
+				var downloadModule = require('./downloadGoogle.js');
+				console.log("Start downloadMedia.");
+				downloadModule.downloadMedia(connection);
+			});
+
 		});
 	});
 });

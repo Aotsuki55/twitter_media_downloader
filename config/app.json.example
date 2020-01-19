@@ -12,10 +12,16 @@
     "access_token_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
   },
+  "google": {
+    "CLIENT_ID": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "CLIENT_SECRET": "xxxxxxxxxxxxxxxxxx",
+    "REDIRECT_URL ": "http://localhost"
+  },
   "create_table": true,
   "create_media_table": true,
   "create_updateId_table": true,
   "create_user_table": true,
+  "refresh_token": "",
   "download_path": "/Users/xxxxxxx/xxxxxxxx/twitter",     //画像のダウンロード先のフォルダ
   "link_path": "/Users/xxxxxxxxxx/TweetMediaViewer/public/twitter"     //TweetMediaViewerとの連携用
 }
