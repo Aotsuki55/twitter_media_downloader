@@ -175,7 +175,6 @@ exports.downloadMedia = function(connection) {
 						connection.query(
 							sql,
 							function(error,results,fields) {
-								console.log(sql1)
 								userUpdate(sql1).catch(function(err) {console.log("250:" + err);}).then(function(){
 									var removeFiles = fs.readdirSync(download_path);
 									for (let file in removeFiles) {
