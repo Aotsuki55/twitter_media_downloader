@@ -137,14 +137,22 @@ exports.createUpdateIdTable = function(connection, nconf) {
 		+ '`updated_at` datetime DEFAULT NULL,'
 		+ 'primary key(id)'
 		+ ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
+	var sql2 = 'insert into updateId set id=0 , since_id_str="1"';
 	connection.query(sql, function (error, results, fields) {
 		if(error) {
 			console.log('failed to create updateId table.');
 			console.log(error);
 		} else {
-			console.log('updateId table is successfully created.');
-			nconf.set('create_updateId_table', false);
-			nconf.save();
+			connection.query(sql2, function (error, results, fields) {
+				if(error) {
+					console.log('failed to create updateId table.');
+					console.log(error);
+				} else {
+					console.log('updateId table is successfully created.');
+					nconf.set('create_updateId_table', false);
+					nconf.save();
+				}
+			});
 		}
 	});
 }

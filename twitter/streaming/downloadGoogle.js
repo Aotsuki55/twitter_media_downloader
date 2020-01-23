@@ -10,6 +10,8 @@ exports.downloadMedia = function(connection) {
 		var nameToIdstr = {};
 		var promises2 = [];
 		var promises3 = [];
+		var flag1 = false;
+		var sql1 = 'insert into `user` ( user_id_str , user_name , user_screen_name , updated_at ) values ';
 		var download = function(url, path, filename, media_id_str, fs, request, resolve, reject) {
 			var write = fs.createWriteStream(path + '/' + filename);
 			var f=0;
@@ -79,6 +81,22 @@ exports.downloadMedia = function(connection) {
 				}));
 			})
 		};
+		var userUpdate = function(sql){
+			return new Promise(function(resolve, reject){
+				if(flag1){
+					connection.query(
+						sql,
+						function(error,results,fields) {
+							if(error){
+								reject(error);
+							}
+							else resolve();
+						}
+					);
+				}
+				else resolve();
+			})
+		};
 		Nconf.use('file', {
 			file: '../../config/app.json'
 		});
@@ -105,6 +123,21 @@ exports.downloadMedia = function(connection) {
 					var count = results.length;
 					console.log(results.length);
 					console.log("Download start!");
+					var user_names = {};
+					var user_screen_names = {};
+					var updated_ats = {};
+					for(data in results) {
+						user_names[results[data].user_id_str] = results[data].user_name;
+						user_screen_names[results[data].user_id_str] = results[data].user_screen_name;
+						updated_ats[results[data].user_id_str] = formatDate(results[data].saved_at);
+					}
+					for(user_id_str in user_names){
+						console.log(user_id_str);
+						if(flag1) sql1+=' , ';
+						else flag1 = true;
+						sql1 += '( "'+user_id_str+'" , "'+user_names[user_id_str]+'" , "'+user_screen_names[user_id_str]+'" , "'+updated_ats[user_id_str]+'" )';
+					}
+					sql1 += ' ON DUPLICATE KEY UPDATE user_name = VALUES(user_name), user_screen_name = VALUES(user_screen_name), updated_at = VALUES(updated_at)'
 					for(let data in results){
 						var ext = "";
 						var url = results[data].download_url;
@@ -142,25 +175,42 @@ exports.downloadMedia = function(connection) {
 						connection.query(
 							sql,
 							function(error,results,fields) {
-								var removeFiles = fs.readdirSync(download_path);
-								for (let file in removeFiles) {
-									promises3.push(fs.unlinkAsync(download_path + "/" + removeFiles[file]));
-								}
-								Promise.all(promises3, {concurrency: 50}).catch(function(err) {console.log("250:" + err);}).then(function() {
-									if(count != 0){
-										exports.downloadMedia(connection);
+								console.log(sql1)
+								userUpdate(sql1).catch(function(err) {console.log("250:" + err);}).then(function(){
+									var removeFiles = fs.readdirSync(download_path);
+									for (let file in removeFiles) {
+										promises3.push(fs.unlinkAsync(download_path + "/" + removeFiles[file]));
 									}
-									else{
-										console.log("Download successfully!!!");
-										process.exit(0);
-									}
+									Promise.all(promises3, {concurrency: 50}).catch(function(err) {console.log("350:" + err);}).then(function() {
+										if(count != 0){
+											exports.downloadMedia(connection);
+										}
+										else{
+											console.log("Download successfully!!!");
+											process.exit(0);
+										}
+									});
 								});
-							}
-						);
+							});
 					});						
 				});
 			});
 		});
 	});
-	
+}
+
+function formatDate(date) {
+	var obj = new Date(Date.parse(date));
+	var str = obj.getFullYear();
+	str += '-';
+	str += parseInt(obj.getMonth()) + 1;
+	str += '-';
+	str += obj.getDate();
+	str += ' ';
+	str += obj.getHours();
+	str += ':';
+	str += obj.getMinutes();
+	str += ':';
+	str += obj.getSeconds();
+	return str;
 }
