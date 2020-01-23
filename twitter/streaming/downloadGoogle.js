@@ -132,7 +132,6 @@ exports.downloadMedia = function(connection) {
 						updated_ats[results[data].user_id_str] = formatDate(results[data].saved_at);
 					}
 					for(user_id_str in user_names){
-						console.log(user_id_str);
 						if(flag1) sql1+=' , ';
 						else flag1 = true;
 						sql1 += '( "'+user_id_str+'" , "'+user_names[user_id_str]+'" , "'+user_screen_names[user_id_str]+'" , "'+updated_ats[user_id_str]+'" )';
