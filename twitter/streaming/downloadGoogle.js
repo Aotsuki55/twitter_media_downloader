@@ -190,7 +190,7 @@ exports.downloadMedia = function(connection) {
 									});
 								});
 							});
-					});						
+					}).catch(function(err) {console.log("350:" + err);});						
 				});
 			});
 		});
