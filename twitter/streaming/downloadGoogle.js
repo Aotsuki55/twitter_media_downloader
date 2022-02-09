@@ -57,7 +57,7 @@ exports.downloadMedia = function(connection) {
 					if(res.statusCode==200){
 						f=1;
 					}
-					else if(res.statusCode==404){
+					else if(res.statusCode==404||res.statusCode==403){
 						console.log('statusCode: ' + res.statusCode + " " + url);
 						var exts = url.match(/^https?:[^:?]+/);
 						if(exts) url = exts[0];
